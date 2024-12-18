@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-
 //создаем класс EAS (Employer Accounting System)
 class EAS {
     public static PrintStream out = System.out; // Для вывода сообщений на экран
@@ -25,7 +24,7 @@ class EAS {
         else { // Иначе выводим
             out.println("Сотрудники компании " + companyName + ":");
             for (int i = 0; i < listOfWorkers.length; i++) {
-                out.println(listOfWorkers[i].getFirstName() + " " + listOfWorkers[i].getSecondName() + " - " + listOfWorkers[i].getLevelOfWorker());
+                out.println(listOfWorkers[i].getFirstName() + " " + listOfWorkers[i].getSecondName() + " - Должность: " + listOfWorkers[i].getLevelOfWorker() + ", Заданий: " + listOfWorkers[i].getCountOfTasks());
             }
         }
     }
@@ -130,6 +129,7 @@ class EAS {
             out.println("Сотрудника `"+firstName+" "+secondName+"` не существует!");
         }
         else { // Если такой сотрудник существует - увольняем
+            listOfWorkers[workerID].reset();
             int k = 0;
             Worker[] newList = new Worker[listOfWorkers.length-1]; // Новый список
             for (int i = 0; i < listOfWorkers.length-1; i++) {
@@ -183,15 +183,150 @@ class EAS {
     }
     // Понижение сотрудников с низким отношением долдности к производительности (level Down Worker With Bad Perfomance)
     public void levelDownWWBP() {
-        double perf = Math.pow(10, 10);
+        double perf = Math.pow(10, 10); // perfomance
         int id = 0;
-        for (int i = 0; i < listOfWorkers.length; i++) {
+        for (int i = 0; i < listOfWorkers.length; i++) { // Поиск id сотрудника с наименьшим отношением
             if ((listOfWorkers[i].getCountOfTasks()/(double)listOfWorkers[i].getLevelOfWorker()) < perf) {
                 perf = listOfWorkers[i].getCountOfTasks()/(double)listOfWorkers[i].getLevelOfWorker();
-                id = i;
+                id = i; // Получем id самого ленивого
             }
         }
-        
+        // Проверки
+        if (listOfWorkers.length == 1) { // Если длина списка 1, то этот сотрудник самый ленивый и соседей нет
+            if (listOfWorkers[id].getLevelOfWorker() == 1) { // Если должность уже минимальная
+                out.println("У сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` уже минимальная должность!");
+            }
+            else { // Если должность не минимальная
+                listOfWorkers[id].levelDown(); // Понижение
+                out.println("Понижение сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` до должности: " + listOfWorkers[id].getLevelOfWorker());
+            }            
+        }
+        else {
+            if (id == 0) { // Если больше 1 сотрудника и самый ленивый - первый
+                if (listOfWorkers[id].getLevelOfWorker() == 1) { // Если должность уже минимальная
+                    out.println("У сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` уже минимальная должность!");
+                }
+                else { // Если должность не минимальная
+                    listOfWorkers[id].levelDown(); // Понижение
+                    out.println("Понижение сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` до должности: " + listOfWorkers[id].getLevelOfWorker());
+                }
+                if (listOfWorkers[id+1].getLevelOfWorker() == 1) { // Тоже самое для соседа
+                    out.println("У соседнего сотрудника `" + listOfWorkers[id+1].getFirstName() + " " + listOfWorkers[id+1].getSecondName() + "` уже минимальная должность!");
+                }
+                else {
+                    listOfWorkers[id+1].levelDown();
+                    out.println("Понижение соседнего сотрудника `" + listOfWorkers[id+1].getFirstName() + " " + listOfWorkers[id+1].getSecondName() + "` до должности: " + listOfWorkers[id+1].getLevelOfWorker());
+                }
+            }
+            else { // Если больше 1 сотрудника и самый ленивый - последний
+                if (id == listOfWorkers.length-1) {
+                    if (listOfWorkers[id].getLevelOfWorker() == 1) { // Если должность уже минимальная
+                        out.println("У сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` уже минимальная должность!");
+                    }
+                    else { // Если должность не минимальная
+                        listOfWorkers[id].levelDown(); // Понижение
+                        out.println("Понижение сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` до должности: " + listOfWorkers[id].getLevelOfWorker());
+                    }
+                    if (listOfWorkers[id-1].getLevelOfWorker() == 1) { // Всё тоже самое
+                        out.println("У соседнего сотрудника `" + listOfWorkers[id-1].getFirstName() + " " + listOfWorkers[id-1].getSecondName() + "` уже минимальная должность!");
+                    }
+                    else {
+                        listOfWorkers[id-1].levelDown();
+                        out.println("Понижение соседнего сотрудника `" + listOfWorkers[id-1].getFirstName() + " " + listOfWorkers[id-1].getSecondName() + "` до должности: " + listOfWorkers[id-1].getLevelOfWorker());
+                    }                    
+                }
+                else { // Если ленивый сотрудник не первый и не последний
+                    if (listOfWorkers[id].getLevelOfWorker() == 1) { // Если должность уже минимальная
+                        out.println("У сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` уже минимальная должность!");
+                    }
+                    else { // Если должность не минимальная
+                        listOfWorkers[id].levelDown(); // Понижение
+                        out.println("Понижение сотрудника `" + listOfWorkers[id].getFirstName() + " " + listOfWorkers[id].getSecondName() + "` до должности: " + listOfWorkers[id].getLevelOfWorker());
+                    }
+                    if (listOfWorkers[id+1].getLevelOfWorker() == 1) { // Всё тоже самое для следующего соседа
+                        out.println("У соседнего сотрудника `" + listOfWorkers[id+1].getFirstName() + " " + listOfWorkers[id+1].getSecondName() + "` уже минимальная должность!");
+                    }
+                    else {
+                        listOfWorkers[id+1].levelDown();
+                        out.println("Понижение соседнего сотрудника `" + listOfWorkers[id+1].getFirstName() + " " + listOfWorkers[id+1].getSecondName() + "` до должности: " + listOfWorkers[id+1].getLevelOfWorker());
+                    }
+                    if (listOfWorkers[id-1].getLevelOfWorker() == 1) { // Всё тоже самое для предыдущего соседа
+                        out.println("У соседнего сотрудника `" + listOfWorkers[id-1].getFirstName() + " " + listOfWorkers[id-1].getSecondName() + "` уже минимальная должность!");
+                    }
+                    else {
+                        listOfWorkers[id-1].levelDown();
+                        out.println("Понижение соседнего сотрудника `" + listOfWorkers[id-1].getFirstName() + " " + listOfWorkers[id-1].getSecondName() + "` до должности: " + listOfWorkers[id-1].getLevelOfWorker());
+                    }                      
+                }
+            }
+        }   
+    }
+    // Доска почёта
+    public void honorBoard() {
+        // Переменные для хранения информации (id и состояние поиска)
+        int id1 = 0; boolean find1 = false;
+        int id2 = 0; boolean find2 = false;
+        int id3 = 0; 
+        double max = 0;
+        if (listOfWorkers.length < 3) { // Если сотрудников < 3
+            out.println("В компании меньше 3-х сотрудников!");
+        }
+        else {
+            for (int i = 0; i < listOfWorkers.length; i++) { // Поиск 1-го, 2-го, 3-го места
+                double perf = listOfWorkers[i].getCountOfTasks() / (double)listOfWorkers[i].getLevelOfWorker(); // Производительность
+                if (perf > max && find1 == false) { // Пока id1 не найден
+                    id1 = i; max = perf;
+                }
+                if (perf > max && find1 == true && i != id1 && find2 == false) { // Пока id2 не найден
+                    id2 = i; max = perf;
+                }
+                if (perf > max && find1 == true && i != id1 && find2 == true && i != id2) { // Пока id3 не найден
+                    id3 = i; max = perf;
+                }
+                if (i == listOfWorkers.length-1) { // Когда доходим до конца списка
+                    if (find1 == true && find2 == false) { // Если первый найден и второй не найден
+                        find2 = true;
+                        i = -1; max = 0;
+                    }
+                    if (find1 == false) { // Если не первый найден
+                        find1 = true;
+                        i = -1; max = 0;
+                    }
+                }
+            }
+            if (id3 == 0) { // Это значит, что как минимум 1 работник ничего не делал
+                out.println("В компании нет 3-х сотрудников с не нулевым количеством выполенных заданий!");
+            }
+            else { // Вывод топ-3
+                out.println("Три лучших сотрудника компании `" + this.companyName + "`: ");
+                out.println("1. " + listOfWorkers[id1].getFirstName() + " " + listOfWorkers[id1].getSecondName());
+                out.println("2. " + listOfWorkers[id2].getFirstName() + " " + listOfWorkers[id2].getSecondName());
+                out.println("3. " + listOfWorkers[id3].getFirstName() + " " + listOfWorkers[id3].getSecondName());
+            }
+        }
+    }
+    // Увольнение или понижение сотрудников с минимальной производительностью
+    public void punishWorstWorkers() {
+        int countOfTasks = (int)Math.pow(10,10); // Минимальное количесвто задач
+        for (int i = 0; i < listOfWorkers.length; i++) { // Поиск наименьшего кол-ва
+            if (listOfWorkers[i].getCountOfTasks() < countOfTasks) {
+                countOfTasks = listOfWorkers[i].getCountOfTasks();
+            }
+        }
+        for (int i = 0; i < listOfWorkers.length; i++) { // Поиск и "наказание" сотрудников с наимельшим кол-вом задач
+            if (listOfWorkers[i].getCountOfTasks() == countOfTasks) {
+                if (listOfWorkers[i].getLevelOfWorker() == 1) { // Если должность минимальная - увольняем
+                    String fN = listOfWorkers[i].getFirstName();
+                    String sN = listOfWorkers[i].getSecondName();
+                    this.kickWorker(fN, sN);
+                    i--;
+                }
+                else { // Иначе понижаем
+                    listOfWorkers[i].levelDown();
+                    out.println("Понижение сотрудника `" + listOfWorkers[i].getFirstName() + " " + listOfWorkers[i].getSecondName() + "` до должности: " + listOfWorkers[i].getLevelOfWorker());
+                }
+            }
+        }
     }
 }
 
@@ -248,40 +383,79 @@ class Worker {
             levelOfWorker--;
         }
     }
+    public void reset() {
+        levelOfWorker = 1;
+        countOfTasks = 0;
+    }
 }
 
 public class Lab3 {
     public static Scanner in = new Scanner(System.in);
     public static PrintStream out = System.out;
     public static void main(String[] args) throws IOException {
+        // Создание компании
         EAS company = new EAS("Some Cool Company");
-        Worker w1 = new Worker("Матвей", "Худяков");
+        // Создание работников
+        Worker w1 = new Worker("Иван", "Олегович");
         Worker w2 = new Worker("Яна", "Ант");
-        Worker w3 = new Worker("Ян", "Ант");
-        Worker w4 = new Worker("Циц", "Худяков");
-        Worker w5 = new Worker("Aa", "Худяков");
-        Worker w6 = new Worker("Aa", "Худякова");
-        Worker w7 = new Worker("Борис", "Бритва");
-
+        Worker w3 = new Worker("Хлоя", "Дмитриевна");
+        Worker w4 = new Worker("Дарья", "Ионановна");
+        Worker w5 = new Worker("Антон", "Антонов");
+        Worker w6 = new Worker("Олег", "Манго");
+        Worker w7 = new Worker("Борис", "Безверь");
+        // Добавление работников в компанию
         company.add(w1);
         company.add(w2);
         company.add(w3);
         company.add(w4);
         company.add(w5);
         company.add(w6);
-        company.add(w7);
+        company.add(w7); out.println();
+        // Выводим список сотрудников
+        company.list(); out.println();
+        // Раздача задач
         company.addTask(w1);
+        company.addTask(w1);
+        company.addTask(w1);
+        company.addTask(w2);
+        company.addTask(w2);
+        company.addTask(w2);
+        company.addTask(w3);
+        company.addTask(w4);
+        company.addTask(w6);
         company.addTask(w7);
-        company.addTask(w7);
+        company.addTask(w7); out.println();
+        // Повышаем
+        company.levelUp(w7);
+        company.levelUp(w7);
         company.levelUp(w1);
-        company.addTaskWithDifficult(w1, 2);
-        company.list();
-        company.kickWorker("Яна", "Ант");
-        company.list();
-        company.add(w2);
-        company.list();
-        company.kickBadWorkers(2);
-        company.levelUpBestWorkers();
-        company.list();
+        company.levelUp(w1);
+        company.levelUp(w2);
+        company.levelUp(w4); out.println();
+        // Даём задание со сложностью
+        company.addTaskWithDifficult(w1, 7);
+        company.addTaskWithDifficult(w1, 3);
+        company.addTaskWithDifficult(w7, 2); out.println();
+        // Увольняем работника
+        company.kickWorker("Такого", "Нет");
+        company.kickWorker("Антон", "Антонов"); out.println();
+        // Опять выводим
+        company.list(); out.println();
+        // Увольняем работников с низкой производительностью
+        company.kickBadWorkers(2); out.println();
+        // Новый список
+        company.list(); out.println();
+        // Повышаем лучших
+        company.levelUpBestWorkers(); out.println();
+        // Понижаем плохих
+        company.levelDownWWBP(); out.println();
+        // Сотрудник + список
+        company.add(w5);
+        company.add(w4);
+        company.list(); out.println();
+        // Доска почёта
+        company.honorBoard(); out.println();
+        // Наказываем худших
+        company.punishWorstWorkers();
     }
 }
